@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 const FormPeserta = ({ onSimpan, onCancel, pesertaEdit }) => {
   const [nama, setNama] = useState("");
   const [jurusan, setJurusan] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (pesertaEdit) {
@@ -15,9 +16,10 @@ const FormPeserta = ({ onSimpan, onCancel, pesertaEdit }) => {
 
   const handleSimpan = (e) => {
     e.preventDefault();
-
+    if (!nama.trim() || !jurusan.trim()) { setError("Mohon isi nama dan jurusan");
+    return;}
     onSimpan({
-      id: pesertaEdit? pesertaEdit.id : Date.now(),
+      id: pesertaEdit ? pesertaEdit.id : Date.now(),
       nama,
       jurusan,
     });
