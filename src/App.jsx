@@ -1,17 +1,10 @@
-// // import { useState } from "react";
-// // import heroImg from "./assets/hero.png";
-// // import reactLogo from "./assets/react.svg";
-// // import viteLogo from "./assets/vite.svg";
-// // import "./App.css";
-// import { useState } from "react";
-// import DataPeserta from "./component/DataPeserta";
-// import { Peserta } from "./component/Peserta";
-// import FormPeserta from "./component/FormPeserta";
 import Login from "./pages/login";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./pages/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import ListUser from "./pages/user/List";
+import ListMenu from "./pages/product/DaftarMenu";
+import ListKategori from "./pages/product/KategoriMenu";
 
 function App() {
   //   if (editPeserta) {
@@ -55,6 +48,8 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />}></Route>
           <Route path="/user" element={<ListUser />}></Route>
+          <Route path="/menu" element={<ListMenu />}></Route>
+          <Route path="/kategori" element={<ListKategori />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
