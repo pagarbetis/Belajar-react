@@ -5,7 +5,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -21,27 +20,37 @@ const AppModal = ({
   title,
 }) => {
   return (
-    <Dialog open={show} openChange={onClose}>
+    <Dialog open={show} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[540px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="text-xl font-bold">{title}</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Lengkapi data di bawah ini dengan benar.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={onSubmit}>
           <div className="py-2">{children}</div>
 
-          <DialogFooter>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Loading..." : submitLabel}
-            </Button>
-            <Button variant="outline" onClick={() => onClose(false)}>
-              {cancelLabel}
-            </Button>
-          </DialogFooter>
+          {showFooter && (
+            <DialogFooter className="flex gap-2 mt-6 sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onClose(false)}
+                className="rounded-md hover:"
+              >
+                {cancelLabel}
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="rounded-md hover:shadow-md bg-primary hover:bg-primary/90"
+              >
+                {isLoading ? "Loading..." : submitLabel}
+              </Button>
+            </DialogFooter>
+          )}
         </form>
       </DialogContent>
     </Dialog>

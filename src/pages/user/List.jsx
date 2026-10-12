@@ -1,37 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppModal from "../../components/AppModal";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-
-const dataUsers = [
-  {
-    id: 1,
-    name: "Angga",
-    email: "andiangga56@gmail.com",
-    password: 1234567,
-  },
-  {
-    id: 2,
-    name: "Andi",
-    email: "andi@gmail.com",
-    password: 1234567,
-  },
-  {
-    id: 3,
-    name: "Putra",
-    email: "putra@gmail.com",
-    password: 1234567,
-  },
-];
+import { Eye, EyeOff } from "lucide-react";
+import api from "../../services/api.js";
 
 const ListUser = () => {
   const _initForm = {
@@ -39,42 +13,63 @@ const ListUser = () => {
     name: "",
     email: "",
     password: "",
-    status: "Active",
+    is_active: 1,
   };
   const [showModal, setShowModal] = useState(false);
-  const [users, setUsers] = useState(dataUsers);
-  const [formData, setFormData] = useState({
-    id: null,
-    name: "",
-    email: "",
-    password: "",
-    status: "Active",
-  });
+  const [users, setUsers] = useState([]);
+  const [formData, setFormData] = useState(_initForm);
   const [isEdit, setIsEdit] = useState(false);
+
+  // State buat toggle show/hide password
+  const [showPassword, setShowPassword] = useState(false);
+
+  const fetchUser = async () => {
+    try {
+      const response = await api.get("/user");
+      setUsers(response.data.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   const handleOpenModal = () => {
     setShowModal(true);
     setFormData(_initForm);
     setIsEdit(false);
+    setShowPassword(false);
   };
 
   const handleEditModal = (user) => {
     setShowModal(true);
     setIsEdit(true);
-    setFormData(user);
+    setFormData({
+      ...user,
+      password: "", // Kosongin password pas edit biar ga ke-overwrite string kosong/hash lama kecuali diisi
+    });
+    setShowPassword(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const isConfirm = window.confirm("Are you sure want to delete this data?");
     if (!isConfirm) {
       return;
     }
-    // filter: user
-    setUsers(users.filter((u) => u.id !== id));
+    try {
+      await api.delete(`/user/${id}`);
+      fetchUser();
+    } catch (error) {
+      const errMsg = error.message;
+      console.log(errMsg);
+    }
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
+    fetchUser();
   };
 
   const handleChange = (e) => {
@@ -84,22 +79,34 @@ const ListUser = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isEdit) {
-      setUsers(
-        users.map((user) => (user.id === formData.id ? formData : user)),
-      );
-    } else {
-      const newUser = {
-        ...formData,
-        id: Date.now(),
-      };
-      setUsers([...users, newUser]);
-      setFormData(_initForm);
-    }
 
-    setShowModal(false);
+    try {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        is_active: parseInt(formData.is_active),
+      };
+
+      // Kalau password diisi pas edit atau pas create, ikut dikirim
+      if (formData.password) {
+        payload.password = formData.password;
+      }
+
+      if (isEdit) {
+        await api.put(`/user/${formData.id}`, payload);
+      } else {
+        await api.post("/user", payload);
+      }
+      setFormData(_initForm);
+    } catch (error) {
+      const errMsg = error.message;
+      console.log(errMsg);
+    } finally {
+      fetchUser();
+      setShowModal(false);
+    }
   };
 
   return (
@@ -126,14 +133,38 @@ const ListUser = () => {
             </thead>
             <tbody className="divide-y divide-border">
               {users.map((user, index) => (
-                <tr key={index} className="hover:bg-muted/50 trasition-colors">
+                <tr key={index} className="transition-colors hover:bg-muted/50">
                   <td className="px-5 py-6 whitespace-nowrap">{index + 1}</td>
                   <td className="px-5">{user.name}</td>
                   <td>{user.email}</td>
                   <td className="px-6 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
-                      <span>Active</span>
+                      <span className="relative flex w-2.5 h-2.5">
+                        <span
+                          className={`absolute inline-flex w-full h-full rounded-full opacity-75 ${
+                            user.is_active === 1
+                              ? "bg-emerald-500"
+                              : "bg-rose-500"
+                          }`}
+                        ></span>
+                        <span
+                          className={`relative inline-flex w-2.5 h-2.5 rounded-full ${
+                            user.is_active === 1
+                              ? "bg-emerald-500"
+                              : "bg-rose-500"
+                          }`}
+                        ></span>
+                      </span>
+
+                      <span
+                        className={`text-xs font-medium ${
+                          user.is_active === 1
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-rose-600 dark:text-rose-400"
+                        }`}
+                      >
+                        {user.is_active === 1 ? "Active" : "Non-Active"}
+                      </span>
                     </div>
                   </td>
                   <td>
@@ -141,7 +172,7 @@ const ListUser = () => {
                       onClick={() => handleEditModal(user)}
                       variant="warning"
                       size="sm"
-                      className="bg-yellow-400 rounded-md me-2"
+                      className="text-black bg-yellow-400 rounded-md me-2 hover:bg-yellow-500"
                     >
                       Edit
                     </Button>
@@ -149,7 +180,7 @@ const ListUser = () => {
                       onClick={() => handleDelete(user.id)}
                       variant="danger"
                       size="sm"
-                      className="bg-red-600 rounded-md me-2"
+                      className="bg-red-500 rounded-md me-2 hover:bg-red-700"
                     >
                       Delete
                     </Button>
@@ -178,7 +209,7 @@ const ListUser = () => {
               onChange={handleChange}
               required
               placeholder="Enter your name"
-            ></Input>
+            />
           </div>
           <div className="space-y-2">
             <Label>Email</Label>
@@ -190,56 +221,53 @@ const ListUser = () => {
               onChange={handleChange}
               required
               placeholder="Enter your email"
-            ></Input>
+            />
           </div>
+
           <div className="space-y-2">
-            <Label>Password</Label>
-            <Input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Enter your password"
-            ></Input>
+            <Label>
+              Password {isEdit && "(Kosongkan jika tidak ingin mengubah)"}
+            </Label>
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required={!isEdit}
+                placeholder="Enter your password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute -translate-y-1/2 right-3 top-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
+
+          {isEdit && (
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <select
+                name="is_active"
+                value={formData.is_active}
+                onChange={handleChange}
+                className="flex w-full px-3 py-1 text-sm transition-colors bg-transparent border rounded-md shadow-sm h-9 border-input file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value={1}>Active</option>
+                <option value={0}>Non-Active</option>
+              </select>
+            </div>
+          )}
         </div>
-        {/* <Form>
-          <Form.Group className="mb-3">
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              value={formData.name}
-              onChange={handleChange}
-              type="text"
-              name="name"
-              placeholder="Enter your name"
-              required
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              value={formData.email}
-              onChange={handleChange}
-              type="email"
-              name="email"
-              placeholder="Enter your Email"
-              required
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              value={formData.password}
-              onChange={handleChange}
-              type="password"
-              name="password"
-              placeholder="Enter your Password"
-              required
-            ></Form.Control>
-          </Form.Group>
-        </Form> */}
       </AppModal>
     </>
   );

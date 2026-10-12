@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { 
-  Eye, 
-  EyeOff, 
-  ShoppingBag, 
-  Lock, 
-  Mail, 
+import {
+  Eye,
+  EyeOff,
+  ShoppingBag,
+  Lock,
+  Mail,
   ArrowRight,
   TrendingUp,
   Receipt,
-  PackageCheck
+  PackageCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,8 +39,8 @@ export default function Login() {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Accept: "application/json",
-          "Content-type": "application/json",
         },
         body: JSON.stringify(formData),
       });
@@ -102,10 +102,12 @@ export default function Login() {
         <div className="relative z-10 max-w-lg my-auto space-y-8">
           <div className="space-y-3">
             <h1 className="text-4xl font-extrabold leading-tight tracking-tight">
-              Kelola Transaksi Kasir Lebih <span className="text-blue-500">Cepat & Efisien.</span>
+              Kelola Transaksi Kasir Lebih{" "}
+              <span className="text-blue-500">Cepat & Efisien.</span>
             </h1>
             <p className="text-sm leading-relaxed text-slate-400">
-              Sistem Point of Sales modern terintegrasi untuk pencatatan penjualan, inventaris barang, dan laporan performa real-time.
+              Sistem Point of Sales modern terintegrasi untuk pencatatan
+              penjualan, inventaris barang, dan laporan performa real-time.
             </p>
           </div>
 
@@ -115,28 +117,34 @@ export default function Login() {
               <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400">
                 <Receipt className="w-5 h-5" />
               </div>
-              <span className="text-xs font-medium text-slate-300">Transaksi Cepat</span>
+              <span className="text-xs font-medium text-slate-300">
+                Transaksi Cepat
+              </span>
             </div>
 
             <div className="flex flex-col items-center p-4 space-y-2 text-center border rounded-2xl bg-slate-900/80 border-slate-800 backdrop-blur-md">
               <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
                 <TrendingUp className="w-5 h-5" />
               </div>
-              <span className="text-xs font-medium text-slate-300">Laporan Real-time</span>
+              <span className="text-xs font-medium text-slate-300">
+                Laporan Real-time
+              </span>
             </div>
 
             <div className="flex flex-col items-center p-4 space-y-2 text-center border rounded-2xl bg-slate-900/80 border-slate-800 backdrop-blur-md">
               <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
                 <PackageCheck className="w-5 h-5" />
               </div>
-              <span className="text-xs font-medium text-slate-300">Stok Otomatis</span>
+              <span className="text-xs font-medium text-slate-300">
+                Stok Otomatis
+              </span>
             </div>
           </div>
         </div>
 
         {/* Footer Info */}
         <div className="relative z-10 text-xs text-slate-500">
-          © 2026 PPKD Jakarta Pusat. All rights reserved.
+          © 2026 Andi angga krismona p. All rights reserved.
         </div>
       </div>
 
@@ -160,7 +168,10 @@ export default function Login() {
           <form onSubmit={handleLogin} className="space-y-5">
             {/* Input Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <Label
+                htmlFor="email"
+                className="text-xs font-semibold text-slate-700 dark:text-slate-300"
+              >
                 Email
               </Label>
               <div className="relative">
@@ -182,10 +193,16 @@ export default function Login() {
             {/* Input Password */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <Label
+                  htmlFor="password"
+                  className="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
                   Password
                 </Label>
-                <a href="#" className="text-xs font-medium text-blue-600 hover:underline">
+                <a
+                  href="#"
+                  className="text-xs font-medium text-blue-600 hover:underline"
+                >
                   Forgot Password?
                 </a>
               </div>
