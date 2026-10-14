@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import api from "../services/api.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -36,38 +37,32 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await api.post("/auth/login", formData);
+      console.log(res.data.token);
 
-      const result = await res.json();
+      // const result = await res.json();
 
-      if (!res.ok) {
-        throw new Error(result.message || "Email atau password salah!");
-      }
+      // if (!res.ok) {
+      //   throw new Error(result.message || "Email atau password salah!");
+      // }
 
-      localStorage.setItem("token", result.data.token);
+      localStorage.setItem("token", res.data.token);
 
       Swal.fire({
         icon: "success",
         title: "Login Berhasil!",
         text: "Memuat dashboard...",
-        timer: 1200,
+        timer: 1000,
         showConfirmButton: false,
         width: "350px",
       });
 
-      setTimeout(() => navigate("/Dashboard"), 1200);
-    } catch (error) {
+      navigate("/Dashboard");
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Login Gagal",
-        text: error.message || "Cek kembali email dan password lu.",
+        text: "Cek kembali email dan password lu.",
         confirmButtonColor: "#1d4ed8",
         width: "360px",
         customClass: {

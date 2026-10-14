@@ -6,6 +6,7 @@ import {
   Settings,
   User2,
   ChevronUp,
+  LogOut,
 } from "lucide-react";
 
 import {
@@ -28,6 +29,7 @@ const items = [
   { title: "Inventaris", url: "#", icon: Calendar },
   { title: "Laporan", url: "#", icon: Search },
   { title: "Settings", url: "#", icon: Settings },
+  { title: "Logout", url: "#", icon: LogOut },
 ];
 
 export function AppSidebar() {
