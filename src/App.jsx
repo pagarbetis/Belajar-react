@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import ListUser from "./pages/user/List";
 import ListMenu from "./pages/product/DaftarMenu";
 import ListKategori from "./pages/product/KategoriMenu";
+import ListTransaction from "./pages/transaction/List";
 
 function App() {
   //   if (editPeserta) {
@@ -50,6 +51,7 @@ function App() {
           <Route path="/user" element={<ListUser />}></Route>
           <Route path="/menu" element={<ListMenu />}></Route>
           <Route path="/kategori" element={<ListKategori />}></Route>
+          <Route path="/transaction" element={<ListTransaction />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -24,12 +24,12 @@ import {
 
 // Menu navigasi utama disesuaikan untuk POS System
 const items = [
-  { title: "Dashboard", url: "#", icon: Home },
-  { title: "Transaksi", url: "#", icon: Inbox },
+  { title: "Dashboard", url: "/Dashboard", icon: Home },
+  { title: "Transaksi", url: "/transaction", icon: Inbox },
   { title: "Inventaris", url: "#", icon: Calendar },
   { title: "Laporan", url: "#", icon: Search },
   { title: "Settings", url: "#", icon: Settings },
-  { title: "Logout", url: "#", icon: LogOut },
+  { title: "Logout", url: "/login", icon: LogOut },
 ];
 
 export function AppSidebar() {
