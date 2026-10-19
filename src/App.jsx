@@ -3,9 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./pages/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import ListUser from "./pages/user/List";
-import ListMenu from "./pages/product/DaftarMenu";
-import ListKategori from "./pages/product/KategoriMenu";
 import ListTransaction from "./pages/transaction/List";
+import CategoryPage from "./pages/Category/List";
+import ProductPage from "./pages/product/List";
 
 function App() {
   //   if (editPeserta) {
@@ -49,9 +49,9 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />}></Route>
           <Route path="/user" element={<ListUser />}></Route>
-          <Route path="/menu" element={<ListMenu />}></Route>
-          <Route path="/kategori" element={<ListKategori />}></Route>
+          <Route path="/category" element={<CategoryPage />}></Route>
           <Route path="/transaction" element={<ListTransaction />}></Route>
+          <Route path="/product" element={<ProductPage />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,10 +1,12 @@
 import {
   Home,
-  Inbox,
-  Calendar,
+  ShoppingCart,
+  ShoppingBag,
+  ListSortDescending,
   Search,
   Settings,
   User2,
+  Users,
   ChevronUp,
   LogOut,
 } from "lucide-react";
@@ -22,12 +24,12 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-// Menu navigasi utama disesuaikan untuk POS System
 const items = [
   { title: "Dashboard", url: "/Dashboard", icon: Home },
-  { title: "Transaksi", url: "/transaction", icon: Inbox },
-  { title: "Inventaris", url: "#", icon: Calendar },
-  { title: "Laporan", url: "#", icon: Search },
+  { title: "Transaksi", url: "/transaction", icon: ShoppingCart },
+  { title: "Product", url: "/product", icon: ShoppingBag },
+  { title: "category", url: "/category", icon: ListSortDescending },
+  { title: "User", url: "/user", icon: Users },
   { title: "Settings", url: "#", icon: Settings },
   { title: "Logout", url: "/login", icon: LogOut },
 ];
@@ -38,7 +40,6 @@ export function AppSidebar() {
       collapsible="icon"
       className="border-r border-slate-800 bg-slate-950 text-slate-100 !transition-all !duration-300 !ease-in-out"
     >
-      {/* Header Aplikasi / Logo POS System PPKD JP */}
       <SidebarHeader className="py-4 border-b border-slate-800/60">
         <div className="flex items-center gap-3 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
           <div className="flex items-center justify-center w-9 h-9 font-bold rounded-xl shrink-0 bg-blue-600 text-white shadow-lg shadow-blue-500/30 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8">
@@ -55,7 +56,6 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      {/* Menu / Navigasi Utama */}
       <SidebarContent className="px-2 py-3">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-slate-400 uppercase px-2 mb-2 group-data-[collapsible=icon]:hidden">
@@ -80,7 +80,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Bagian Bawah / Profil User */}
       <SidebarFooter className="p-3 border-t border-slate-800/60">
         <SidebarMenu>
           <SidebarMenuItem>
