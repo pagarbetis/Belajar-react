@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import AppModal from "../../components/AppModal";
+// import AppModal from "../../components/AppModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
+// import { Label } from "@/components/ui/label";
+// import { Input } from "@/components/ui/input";
 import api from "../../services/api.js";
+import { useNavigate } from "react-router-dom";
 
 const ListTransaction = () => {
+  const navigate = useNavigate();
   const _initForm = {
     id: null,
     name: "",
@@ -17,11 +18,8 @@ const ListTransaction = () => {
   };
   const [showModal, setShowModal] = useState(false);
   const [transaction, setTransaction] = useState([]);
-  const [formData, setFormData] = useState(_initForm);
-  const [isEdit, setIsEdit] = useState(false);
-
-  // State buat toggle show/hide password
-  const [showPassword, setShowPassword] = useState(false);
+  // const [formData, setFormData] = useState(_initForm);
+  // const [isEdit, setIsEdit] = useState(false);
 
   const fetchTransaction = async () => {
     try {
@@ -36,22 +34,19 @@ const ListTransaction = () => {
     fetchTransaction();
   }, []);
 
-  const handleOpenModal = () => {
-    setShowModal(true);
-    setFormData(_initForm);
-    setIsEdit(false);
-    setShowPassword(false);
-  };
+  // const handleOpenModal = () => {
+  //   setShowModal(true);
+  //   setFormData(_initForm);
+  //   setIsEdit(false);
+  // };
 
-  const handleEditModal = (user) => {
-    setShowModal(true);
-    setIsEdit(true);
-    setFormData({
-      ...user,
-      password: "",
-    });
-    setShowPassword(false);
-  };
+  // const handleEditModal = (transaction) => {
+  //   setShowModal(true);
+  //   setIsEdit(true);
+  //   setFormData({
+  //     ...transaction,
+  //   });
+  // };
 
   const handleDelete = async (id) => {
     const isConfirm = window.confirm("Are you sure want to delete this data?");
@@ -72,52 +67,49 @@ const ListTransaction = () => {
     fetchTransaction();
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  // const handleChange = (e) => {
+  //   setFormData({
+  //     ...formData,
+  //     [e.target.name]: e.target.value,
+  //   });
+  // };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
 
-    try {
-      const payload = {
-        name: formData.name,
-        email: formData.email,
-        is_active: parseInt(formData.is_active),
-      };
-
-      // Kalau password diisi pas edit atau pas create, ikut dikirim
-      if (formData.password) {
-        payload.password = formData.password;
-      }
-
-      if (isEdit) {
-        await api.put(`/user/${formData.id}`, payload);
-      } else {
-        await api.post("/user", payload);
-      }
-      setFormData(_initForm);
-    } catch (error) {
-      const errMsg = error.message;
-      console.log(errMsg);
-    } finally {
-      fetchTransaction();
-      setShowModal(false);
-    }
-  };
+  //   try {
+  //     const payload = {
+  //       name: formData.name,
+  //       email: formData.email,
+  //       is_active: parseInt(formData.is_active),
+  //     };
+  //     if (isEdit) {
+  //       await api.put(`/transaction/${formData.id}`, payload);
+  //     } else {
+  //       await api.post("/transaction", payload);
+  //     }
+  //     setFormData(_initForm);
+  //   } catch (error) {
+  //     const errMsg = error.message;
+  //     console.log(errMsg);
+  //   } finally {
+  //     fetchTransaction();
+  //     setShowModal(false);
+  //   }
+  // };
 
   return (
     <>
-      <Card className="p-6 border-0 shadow-sm border-border">
+      <Card className="p-6 border-0 rounded-md shadow-md border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
           <div>
             <CardTitle className="text-xl font-bold">Data User</CardTitle>
           </div>
-          <Button className="rounded-md" onClick={handleOpenModal}>
-            Create New User
+          <Button
+            className="rounded-md"
+            onClick={() => navigate("/transaction/create")}
+          >
+            Create New transaction
           </Button>
         </CardHeader>
         <CardContent className="p-0">
@@ -139,30 +131,14 @@ const ListTransaction = () => {
                   <td className="px-5">{user.order_number}</td>
                   <td className="px-14">{user.payment_method}</td>
                   <td className="px-1">
-                  {user.items.map((item) => (
-                    <ul>
-                      <li>{item.nama}</li>
-                    </ul>
-                  ))}
+                    {user.items.map((item) => (
+                      <ul>
+                        <li>{item.nama}</li>
+                      </ul>
+                    ))}
                   </td>
-                  <td className="px-6 whitespace-nowrap">
+                  <td className="px-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <span className="relative flex w-2.5 h-2.5">
-                        <span
-                          className={`absolute inline-flex w-full h-full rounded-full opacity-75 ${
-                            user.is_active === 1
-                              ? "bg-emerald-500"
-                              : "bg-rose-500"
-                          }`}
-                        ></span>
-                        <span
-                          className={`relative inline-flex w-2.5 h-2.5 rounded-full ${
-                            user.is_active === 1
-                              ? "bg-emerald-500"
-                              : "bg-rose-500"
-                          }`}
-                        ></span>
-                      </span>
 
                       <span
                         className={`text-xs font-medium ${
@@ -175,22 +151,22 @@ const ListTransaction = () => {
                       </span>
                     </div>
                   </td>
-                  <td>
-                    <Button
+                  <td className="px-6 py-6">
+                    {/* <Button
                       onClick={() => handleEditModal(user)}
                       variant="warning"
                       size="sm"
                       className="text-black bg-yellow-400 rounded-md me-2 hover:bg-yellow-500"
                     >
                       Edit
-                    </Button>
+                    </Button> */}
                     <Button
                       onClick={() => handleDelete(user.id)}
                       variant="danger"
                       size="sm"
-                      className="bg-red-500 rounded-md me-2 hover:bg-red-700"
+                      className="text-white bg-indigo-600 rounded-md me-2 hover:bg-indigo-700"
                     >
-                      Delete
+                      Print
                     </Button>
                   </td>
                 </tr>
@@ -200,7 +176,7 @@ const ListTransaction = () => {
         </CardContent>
       </Card>
 
-      <AppModal
+      {/* <AppModal
         show={showModal}
         onClose={handleCloseModal}
         title={isEdit ? "Edit User" : "Create New User"}
@@ -237,27 +213,6 @@ const ListTransaction = () => {
               Password {isEdit && "(Kosongkan jika tidak ingin mengubah)"}
             </Label>
             <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required={!isEdit}
-                placeholder="Enter your password"
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute -translate-y-1/2 right-3 top-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
-              </button>
             </div>
           </div>
 
@@ -276,7 +231,7 @@ const ListTransaction = () => {
             </div>
           )}
         </div>
-      </AppModal>
+      </AppModal> */}
     </>
   );
 };

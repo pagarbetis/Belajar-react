@@ -3,13 +3,14 @@ import {
   ShoppingCart,
   ShoppingBag,
   ListSortDescending,
-  Search,
   Settings,
   User2,
   Users,
   ChevronUp,
   LogOut,
 } from "lucide-react";
+
+import { Link } from "react-router-dom";
 
 import {
   Sidebar,
@@ -26,9 +27,9 @@ import {
 
 const items = [
   { title: "Dashboard", url: "/Dashboard", icon: Home },
-  { title: "Transaksi", url: "/transaction", icon: ShoppingCart },
+  { title: "Order", url: "/transaction", icon: ShoppingCart },
   { title: "Product", url: "/product", icon: ShoppingBag },
-  { title: "category", url: "/category", icon: ListSortDescending },
+  { title: "Category", url: "/category", icon: ListSortDescending },
   { title: "User", url: "/user", icon: Users },
   { title: "Settings", url: "#", icon: Settings },
   { title: "Logout", url: "/login", icon: LogOut },
@@ -67,7 +68,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    render={<a href={item.url} />}
+                    render={<Link to={item.url} />}
                     className="hover:bg-slate-800/60 hover:text-blue-400 text-slate-300 transition-all rounded-lg py-2.5 px-3 data-[active=true]:bg-blue-600 data-[active=true]:text-white group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
                   >
                     <item.icon className="w-4 h-4 text-slate-400 group-hover:text-blue-400 shrink-0" />
@@ -84,7 +85,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip="John Doe"
+              tooltip="Ujang Saklar"
               className="hover:bg-slate-800/60 text-slate-300 rounded-lg p-2.5 transition-all group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2"
             >
               <div className="flex items-center justify-center text-blue-400 border rounded-full w-7 h-7 bg-slate-800 border-slate-700 shrink-0">
@@ -92,7 +93,7 @@ export function AppSidebar() {
               </div>
               <div className="flex flex-col text-left group-data-[collapsible=icon]:hidden min-w-0">
                 <span className="text-xs font-semibold truncate text-slate-200">
-                  John Doe
+                  Ujang Saklar
                 </span>
                 <span className="text-[10px] text-slate-400">Kasir Utama</span>
               </div>

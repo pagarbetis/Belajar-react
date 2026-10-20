@@ -1,11 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 import tailwindcssAnimate from "tailwindcss-animate";
 export default {
-  darkMode: ['selector', '[data-mode="dark"]'], // Ini biar otomatis nge-lock dark mode
+  darkMode: ['selector', '[data-mode="dark"]'],
   content: [
     "./index.html", 
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}", // Path tambahan buat folder komponen di luar src
+    "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     container: {

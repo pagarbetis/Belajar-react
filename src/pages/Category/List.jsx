@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
 import api from "../../services/api.js";
 
 const CategoryPage = () => {
@@ -110,7 +109,7 @@ const CategoryPage = () => {
 
   return (
     <>
-      <Card className="p-6 border-0 shadow-sm border-border">
+      <Card className="p-6 border-0 rounded-md shadow-md border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
           <div>
             <CardTitle className="text-xl font-bold">Data Category</CardTitle>
@@ -131,8 +130,8 @@ const CategoryPage = () => {
             <tbody className="divide-y divide-border">
               {categories.map((category, index) => (
                 <tr key={index} className="transition-colors hover:bg-muted/50">
-                  <td className="px-6 py-3 whitespace-nowrap">{index + 1}</td>
-                  <td className="px-6 py-3">{category.name}</td>
+                  <td className="px-6 py-6 whitespace-nowrap">{index + 1}</td>
+                  <td className="px-6 py-6">{category.name}</td>
                   <td>
                     <Button
                       onClick={() => handleEditModal(category)}

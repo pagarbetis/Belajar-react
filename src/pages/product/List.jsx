@@ -83,7 +83,7 @@ const ProductPage = () => {
     e.preventDefault();
     try {
       const payload = {
-        nama: formData.nama,
+        nama: formData.name,
         category_id: formData.category_id,
         price: formData.price,
         description: formData.description,
@@ -128,7 +128,7 @@ const ProductPage = () => {
 
   return (
     <>
-      <Card className="p-6 shadow-sm border-border">
+      <Card className="p-6 rounded-md shadow-md border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
           <div>
             <CardTitle className="text-xl font-bold">Data Product</CardTitle>
@@ -157,7 +157,7 @@ const ProductPage = () => {
               {products.length > 0 ? (
                 products.map((row, index) => (
                   <tr key={index} className="transition-colors hover:bg-muted/50 ">
-                    <td className="px-5 py-6 whitespace-nowrap">{index + 1}</td>
+                    <td className="px-6 py-6 whitespace-nowrap">{index + 1}</td>
                     <td className="px-1 py-6">{row.nama}</td>
                     <td className="px-8 py-6">{row.category_name}</td>
                     <td className="px-5 py-6">{row.price}</td>
@@ -214,7 +214,7 @@ const ProductPage = () => {
         </CardContent>
       </Card>
 
-      <AppModal show={showModal} onClose={handleCloseModal} title={isEdit ? "Edit User" : "Create New User"} onSubmit={handleSubmit} submitLabel={isEdit ? "Save Change" : "Save"}>
+      <AppModal show={showModal} onClose={handleCloseModal} title={isEdit ? "Edit Product" : "Create New Product"} onSubmit={handleSubmit} submitLabel={isEdit ? "Save Change" : "Save"}>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Category</Label>
@@ -233,19 +233,19 @@ const ProductPage = () => {
           </div>
           <div className="space-y-2">
             <Label>Name</Label>
-            <Input id="name" name="name" value={formData.name} onChange={handleChange} required placeholder="Enter your name" />
+            <Input id="name" name="name" value={formData.name} onChange={handleChange} required placeholder="Enter your product name" />
           </div>
           <div className="space-y-2">
             <Label>Price</Label>
-            <Input type="number" id="price" name="price" value={formData.email} onChange={handleChange} required placeholder="Enter your price" />
+            <Input type="number" id="price" name="price" value={formData.price} onChange={handleChange} required placeholder="Enter your price" />
           </div>
           <div className="space-y-2">
             <Label>Stock</Label>
-            <Input type="number" id="stock" name="stock" value={formData.email} onChange={handleChange} required placeholder="Enter your stock" />
+            <Input type="number" id="stock" name="stock" value={formData.stock} onChange={handleChange} required placeholder="Enter your stock" />
           </div>
           <div className="space-y-2">
             <Label>Description</Label>
-            <Input type="text" id="description" name="description" value={formData.email} onChange={handleChange} required placeholder="Enter description product" />
+            <Input type="text" id="description" name="description" value={formData.description} onChange={handleChange} required placeholder="Enter description product" />
           </div>
 
           {/* {isEdit ? (

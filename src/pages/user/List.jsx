@@ -111,7 +111,7 @@ const ListUser = () => {
 
   return (
     <>
-      <Card className="p-6 border-0 shadow-sm border-border">
+      <Card className="p-6 border-0 rounded-md shadow-md border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
           <div>
             <CardTitle className="text-xl font-bold">Data User</CardTitle>
