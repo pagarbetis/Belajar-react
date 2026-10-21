@@ -90,7 +90,7 @@ export default function Login() {
           <div className="flex items-center justify-center w-10 h-10 text-white bg-blue-600 shadow-lg rounded-xl shadow-blue-500/30">
             <ShoppingBag className="w-5 h-5" />
           </div>
-          <span className="tracking-wide">POS System PPKD JP</span>
+          <span className="tracking-wide">POS System Warung Madara</span>
         </div>
 
         {/* Hero Content */}

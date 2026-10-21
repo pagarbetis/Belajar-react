@@ -151,15 +151,7 @@ const ListTransaction = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-6">
-                    {/* <Button
-                      onClick={() => handleEditModal(user)}
-                      variant="warning"
-                      size="sm"
-                      className="text-black bg-yellow-400 rounded-md me-2 hover:bg-yellow-500"
-                    >
-                      Edit
-                    </Button> */}
+                  <td className="py-6 ">
                     <Button
                       onClick={() => handleDelete(user.id)}
                       variant="danger"
@@ -167,6 +159,14 @@ const ListTransaction = () => {
                       className="text-white bg-indigo-600 rounded-md me-2 hover:bg-indigo-700"
                     >
                       Print
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(user.id)}
+                      variant="danger"
+                      size="sm"
+                      className="bg-red-500 rounded-md me-2 hover:bg-red-700"
+                    >
+                      Delete
                     </Button>
                   </td>
                 </tr>

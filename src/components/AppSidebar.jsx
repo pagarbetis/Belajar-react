@@ -43,12 +43,12 @@ export function AppSidebar() {
     >
       <SidebarHeader className="py-4 border-b border-slate-800/60">
         <div className="flex items-center gap-3 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
-          <div className="flex items-center justify-center w-9 h-9 font-bold rounded-xl shrink-0 bg-blue-600 text-white shadow-lg shadow-blue-500/30 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8">
-            <span className="text-xs">POS</span>
+          <div className="flex items-center justify-center w-9 h-9 font-bold rounded-xl shrink-0 bg-green-400 text-white shadow-lg shadow-blue-500/30 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8">
+            <span className="text-xs">MDR</span>
           </div>
           <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
             <span className="text-sm font-bold tracking-wide text-slate-100">
-              PPKD JP
+              Warung Madara
             </span>
             <span className="text-[11px] text-blue-400 font-medium">
               Point of Sales

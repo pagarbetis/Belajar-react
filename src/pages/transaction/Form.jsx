@@ -9,16 +9,17 @@ import { Select } from "@/components/ui/select";
 import { SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SelectContent } from "@/components/ui/select";
 import { CardFooter } from "react-bootstrap";
-
+import { useNavigate } from "react-router-dom";
 const FormTransaction = () => {
-    const _initForm = {
-        id: null,
-        name: "",
-        email: "",
-        password: "",
-        is_active: 1,
-    };
-    
+  const navigate = useNavigate();
+  const _initForm = {
+    id: null,
+    name: "",
+    email: "",
+    password: "",
+    is_active: 1,
+  };
+
   const [product, setProduct] = useState([]);
   const [cart, setCart] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -69,6 +70,54 @@ const FormTransaction = () => {
         })
         .filter((item) => item.qty > 0);
     });
+  };
+
+  const TAX_RATE = 0.1;
+  const totalAmount = cart.reduce(
+    (acc, item) => acc + item.price * item.qty,
+    0,
+  );
+
+  const tax = Math.round(totalAmount * TAX_RATE);
+
+  const total = totalAmount + tax;
+
+  const change = Number(cashAmount) - total;
+
+  const handleChekout = async () => {
+    try {
+      setLoading(true);
+      const payload = {
+        order_number: Date.now(),
+        payment_method: paymentMethod === "cash" ? 2 : 1,
+        items: cart.map((item) => ({
+          product_id: item.id,
+          qty: item.qty,
+          price: item.price,
+        })),
+        subtotal: totalAmount,
+        pay: cashAmount,
+        tax: tax,
+        total: total,
+      };
+      const response = await api.post("/transaction", payload);
+
+      if (!response.status) {
+        alert(response.message || "Failed proccess transaction");
+        return;
+      }
+
+      if (paymentMethod === "qris" && response.payment_gateway?.redirect_url) {
+        window.location.href = response.payment_gateway.redirect_url;
+        return;
+      }
+      
+      navigate("/transaction/print");
+    } catch (error) {
+      console.log("error transaction order", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -174,35 +223,74 @@ const FormTransaction = () => {
                     <SelectValue>Select One</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Cash">Cash</SelectItem>
-                    <SelectItem value="Qris">Qris</SelectItem>
+                    <SelectItem value="cash">Cash</SelectItem>
+                    <SelectItem value="qris">Qris</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Pay</Label>
-                <Input
-                  className="h-8 text-xs rounded-md shadow-sm"
-                  id="cash"
-                  type="number"
-                  placeholder="Enter your cash"
-                  size="sm"
-                ></Input>
-              </div>
+              {paymentMethod === "cash" && (
+                <div className="space-y-1">
+                  <Label className="text-xs">Pay</Label>
+                  <Input
+                    className="h-8 text-xs rounded-md shadow-sm"
+                    id="cash"
+                    type="number"
+                    placeholder="Enter your cash"
+                    size="sm"
+                    value={cashAmount}
+                    onChange={(e) => setCashAmount(e.target.value)}
+                  ></Input>
+                </div>
+              )}
               <div className="space-y-1.5 pt-3 border-t text-xs">
                 <div className="flex justify-between text-xs font-semibold">
+                  <span>Subtotal</span>
+                  <span>
+                    {Number(totalAmount).toLocaleString("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      maximumFractionDigits: 0,
+                    })}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs font-semibold">
+                  <span>Tax</span>
+                  <span>
+                    {Number(tax).toLocaleString("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      maximumFractionDigits: 0,
+                    })}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs font-semibold">
                   <span>Total</span>
-                  <span>Rp.100.000</span>
+                  <span>
+                    {Number(total).toLocaleString("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      maximumFractionDigits: 0,
+                    })}
+                  </span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Change</span>
-                  <span>Rp.100.000</span>
+                  <span>
+                    {Number(change).toLocaleString("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      maximumFractionDigits: 0,
+                    })}
+                  </span>
                 </div>
               </div>
             </CardContent>
             <CardFooter className="p-4 border-t">
-              <Button className="w-full text-xs font-semibold shadow-sm">
-                Save Transaction
+              <Button
+                className="w-full text-xs font-semibold shadow-sm"
+                onClick={handleChekout}
+              >
+                {loading ? "Loading..." : "Save Transaction"}
               </Button>
             </CardFooter>
           </Card>
@@ -210,6 +298,6 @@ const FormTransaction = () => {
       </div>
     </>
   );
-}
+};
 
 export default FormTransaction;

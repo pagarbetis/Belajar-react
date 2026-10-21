@@ -2,9 +2,11 @@ import { Container, Nav, Navbar, NavDropdown, Button } from "react-bootstrap";
 
 export default function AppNavbar() {
   return (
-    <Navbar expand="lg" bg="dark" variant="dark" className="shadow-sm mb-4">
+    <Navbar expand="lg" bg="dark" variant="dark" className="mb-4 shadow-sm">
       <Container>
-        <Navbar.Brand href="/login">Point Of Sales | PPKD JP</Navbar.Brand>
+        <Navbar.Brand href="/login">
+          Point Of Sales | Warung Madara
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
@@ -22,7 +24,7 @@ export default function AppNavbar() {
               </NavDropdown.Item>
             </NavDropdown> */}
           </Nav>
-          <nav className="alignt-items-center gap-2">
+          <nav className="gap-2 alignt-items-center">
             <Navbar.Text className="text-secondary me-2">Admin</Navbar.Text>
             <Button variant="outline-danger" size="sm">
               LogOut

@@ -7,6 +7,7 @@ import ListTransaction from "./pages/transaction/List";
 import CategoryPage from "./pages/Category/List";
 import ProductPage from "./pages/product/List";
 import FormTransaction from "./pages/transaction/Form";
+import PrintTransaction from "./pages/transaction/print";
 
 function App() {
   //   if (editPeserta) {
@@ -52,8 +53,12 @@ function App() {
           <Route path="/user" element={<ListUser />}></Route>
           <Route path="/category" element={<CategoryPage />}></Route>
           <Route path="/transaction" element={<ListTransaction />}></Route>
-          <Route path="/transaction/create" element={<FormTransaction />}></Route>
+          <Route
+            path="/transaction/create"
+            element={<FormTransaction />}
+          ></Route>
           <Route path="/product" element={<ProductPage />}></Route>
+          <Route path="/transaction/print" element={<PrintTransaction />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
