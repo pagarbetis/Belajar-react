@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-// import api from "@/src/services/api";
+import api from "/src/services/api.js";
 import { Button } from "@/components/ui/button";
 
 const PrintTransaction = () => {
@@ -14,9 +14,28 @@ const PrintTransaction = () => {
   const [order, setOrder] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const handlePrint = () =>{
-    window.print()
-  }
+  useEffect(() => {
+    const fetchTransaction = async () => {
+      if (!orderId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await api.get(`/transaction/${orderId}`);
+        setOrder(res.data);
+      } catch (error) {
+        console.log("Failed fetch data transaction", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransaction();
+  }, []);
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
     <>
@@ -48,28 +67,53 @@ const PrintTransaction = () => {
             </div>
             <div className="flex items-start justify-between">
               <span>Payment Method</span>
-              <span className="uppercase">Qris</span>
+              <span className="uppercase">{order.payment_method}</span>
             </div>
           </div>
           <div className="pt-2 space-y-2 border-t border-dashed border-zinc-400">
+          {order?.items?.length > 0 ? (
+            order.items.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="font-semibold">{item.name}</div>
+                <div className="text-[11px] text-zinc-600">
+                  {item.qty} x {item.price.toLocaleString("id-ID")}
+                </div>
+                <div className="font-medium">
+                  Rp. {(item.qty * item.price).toLocaleString("id-ID")}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="flex items-center justify-between">
+              <span>Total Payment</span>
+              <span>Rp. 100.000</span>
+            </div>
+          )}
+          
             <div className="flex items-center justify-between">
               <div className="font-semibold">Mie Sedap</div>
               <div className="text-[11px] text-zinc-600">1 x Rp.100.000</div>
               <div className="font-medium">Rp.100.000</div>
             </div>
             <div className="pt-2 space-y-1 border-t border-dashed border-zinc-400">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>Rp.100.000</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax (10%)</span>
-                <span>Rp.10.000</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Total</span>
-                <span>Rp.110.000</span>
-              </div>
+              {order?.subtotal && (
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>Rp. {order.subtotal.toLocaleString("id-ID")}</span>
+                </div>
+              )}
+              {order?.tax && (
+                <div className="flex justify-between">
+                  <span>Tax (10%)</span>
+                  <span>Rp. {order.tax.toLocaleString("id-ID")}</span>
+                </div>
+              )}
+              {order?.total && (
+                <div className="flex justify-between">
+                  <span>Total</span>
+                  <span>Rp. {order.total.toLocaleString('id-ID')}</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="border border-t-dashed border-zinc-400">
