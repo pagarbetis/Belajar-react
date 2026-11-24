@@ -11,26 +11,27 @@ const CategoryPage = () => {
     id: null,
     name: "",
   };
+
   const [showModal, setShowModal] = useState(false);
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState(_initForm);
   const [isEdit, setIsEdit] = useState(false);
 
-  // State buat toggle show/hide password
-  // const [showPassword, setShowPassword] = useState(false);
-
   const fetchCategories = async () => {
     try {
       const response = await api.get("/category");
-      setCategories(response.data);
-      console.log(response)
+      const list = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : [];
+      setCategories(list);
     } catch (error) {
       console.log(error.message);
     }
   };
 
   useEffect(() => {
-    console.log("render ini")
     fetchCategories();
   }, []);
 
@@ -38,17 +39,15 @@ const CategoryPage = () => {
     setShowModal(true);
     setFormData(_initForm);
     setIsEdit(false);
-    // setShowPassword(false);
   };
 
-  const handleEditModal = (user) => {
+  const handleEditModal = (category) => {
     setShowModal(true);
     setIsEdit(true);
     setFormData({
-      ...user,
-      password: "",
+      id: category.id,
+      name: category.name ?? "",
     });
-    // setShowPassword(false);
   };
 
   const handleDelete = async (id) => {
@@ -60,14 +59,12 @@ const CategoryPage = () => {
       await api.delete(`/category/${id}`);
       fetchCategories();
     } catch (error) {
-      const errMsg = error.message;
-      console.log(errMsg);
+      console.log(error.message);
     }
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    fetchCategories();
   };
 
   const handleChange = (e) => {
@@ -83,26 +80,19 @@ const CategoryPage = () => {
     try {
       const payload = {
         name: formData.name,
-        email: formData.email,
-        is_active: parseInt(formData.is_active),
       };
-
-      // Kalau password diisi pas edit atau pas create, ikut dikirim
-      if (formData.password) {
-        payload.password = formData.password;
-      }
 
       if (isEdit) {
         await api.put(`/category/${formData.id}`, payload);
       } else {
         await api.post("/category", payload);
       }
+
       setFormData(_initForm);
-    } catch (error) {
-      const errMsg = error.message;
-      console.log(errMsg);
-    } finally {
       fetchCategories();
+    } catch (error) {
+      console.log(error.message);
+    } finally {
       setShowModal(false);
     }
   };
@@ -114,44 +104,64 @@ const CategoryPage = () => {
           <div>
             <CardTitle className="text-xl font-bold">Data Category</CardTitle>
           </div>
-          <Button className="rounded-md" onClick={handleOpenModal}>
-            Create New User
+          <Button type="button" className="rounded-md" onClick={handleOpenModal}>
+            Create New Category
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           <table className="w-full text-sm text-left">
             <thead className="text-xs uppercase border-y bg-muted/30 text-muted-foreground">
               <tr>
-                <th className="px-6 py-3 font-md">#</th>
-                <th className="px-6 py-3 font-md">Name</th>
-                <th className="px-6 py-3 font-md">Action</th>
+                <th className="px-4 py-3 font-medium text-center">#</th>
+                <th className="px-4 py-3 font-medium text-center">Name</th>
+                <th className="px-4 py-3 font-medium text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {categories.map((category, index) => (
-                <tr key={index} className="transition-colors hover:bg-muted/50">
-                  <td className="px-6 py-6 whitespace-nowrap">{index + 1}</td>
-                  <td className="px-6 py-6">{category.name}</td>
-                  <td>
-                    <Button
-                      onClick={() => handleEditModal(category)}
-                      variant="warning"
-                      size="sm"
-                      className="text-black bg-yellow-400 rounded-md me-2 hover:bg-yellow-500"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(category.id)}
-                      variant="danger"
-                      size="sm"
-                      className="bg-red-500 rounded-md me-2 hover:bg-red-700"
-                    >
-                      Delete
-                    </Button>
+              {categories.length > 0 ? (
+                categories.map((category, index) => (
+                  <tr
+                    key={category.id ?? index}
+                    className="transition-colors hover:bg-muted/50"
+                  >
+                    <td className="px-4 py-4 text-center whitespace-nowrap">
+                      {index + 1}
+                    </td>
+                    <td className="px-4 py-4 text-center whitespace-nowrap">
+                      {category.name}
+                    </td>
+                    <td className="px-4 py-4 text-center whitespace-nowrap">
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          type="button"
+                          onClick={() => handleEditModal(category)}
+                          size="sm"
+                          className="text-white bg-green-600 rounded-md hover:bg-green-700"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => handleDelete(category.id)}
+                          size="sm"
+                          className="text-white bg-red-600 rounded-md hover:bg-red-700"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="py-6 text-center text-muted-foreground"
+                  >
+                    Category not found
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </CardContent>
@@ -166,14 +176,14 @@ const CategoryPage = () => {
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Nama</Label>
+            <Label>Name</Label>
             <Input
               id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              placeholder="Enter your name"
+              placeholder="Enter category name"
             />
           </div>
         </div>

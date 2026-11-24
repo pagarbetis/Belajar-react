@@ -32,23 +32,26 @@ export default function Login() {
     }));
   };
 
-  const handleLogin = async (e) => {
+const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       const res = await api.post("/auth/login", formData);
-      console.log(res.data.token);
+      const token = res?.token ?? res?.data?.token;
 
-      // const result = await res.json();
+      if (!token) {
+        throw new Error("Token tidak ditemukan di response");
+      }
 
-      // if (!res.ok) {
-      //   throw new Error(result.message || "Email atau password salah!");
-      // }
+      localStorage.setItem("token", token);
 
-      localStorage.setItem("token", res.data.token);
+      const user = res?.user ?? res?.data?.user;
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+      }
 
-      Swal.fire({
+      await Swal.fire({
         icon: "success",
         title: "Login Berhasil!",
         text: "Memuat dashboard...",
@@ -57,9 +60,9 @@ export default function Login() {
         width: "350px",
       });
 
-      navigate("/Dashboard");
+      navigate("/dashboard", { replace: true });
     } catch {
-      Swal.fire({
+      await Swal.fire({
         icon: "error",
         title: "Login Gagal",
         text: "Cek kembali email dan password lu.",
@@ -178,7 +181,7 @@ export default function Login() {
                   className="pl-10 h-11 rounded-xl border-slate-200 focus-visible:ring-blue-600 dark:bg-slate-900 dark:border-slate-800"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="admin@ppkdjp.com"
+                  placeholder="example@gmail.com"
                   required
                   autoFocus
                 />

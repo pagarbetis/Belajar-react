@@ -1,30 +1,24 @@
 import { useEffect, useState } from "react";
-// import AppModal from "../../components/AppModal";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// import { Label } from "@/components/ui/label";
-// import { Input } from "@/components/ui/input";
 import api from "../../services/api.js";
-import { useNavigate } from "react-router-dom";
 
 const ListTransaction = () => {
   const navigate = useNavigate();
-  const _initForm = {
-    id: null,
-    name: "",
-    email: "",
-    password: "",
-    is_active: 1,
-  };
-  const [showModal, setShowModal] = useState(false);
   const [transaction, setTransaction] = useState([]);
-  // const [formData, setFormData] = useState(_initForm);
-  // const [isEdit, setIsEdit] = useState(false);
+  const [busyId, setBusyId] = useState(null);
 
   const fetchTransaction = async () => {
     try {
       const response = await api.get("/transaction");
-      setTransaction(response.data);
+      const list = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : [];
+      setTransaction(list);
     } catch (error) {
       console.log(error.message);
     }
@@ -34,205 +28,252 @@ const ListTransaction = () => {
     fetchTransaction();
   }, []);
 
-  // const handleOpenModal = () => {
-  //   setShowModal(true);
-  //   setFormData(_initForm);
-  //   setIsEdit(false);
-  // };
+  const syncOrderAfterSnap = async (trx, snapResult) => {
+    const orderNum = trx?.order_number ?? snapResult?.order_id;
+    const txStatus = snapResult?.transaction_status || "settlement";
+    if (!orderNum) return;
 
-  // const handleEditModal = (transaction) => {
-  //   setShowModal(true);
-  //   setIsEdit(true);
-  //   setFormData({
-  //     ...transaction,
-  //   });
-  // };
+    try {
+      await api.get(
+        `/transaction/sync-status?order_id=${encodeURIComponent(orderNum)}&transaction_status=${encodeURIComponent(txStatus)}`,
+      );
+    } catch {
+      // Abaikan jika endpoint sync tidak tersedia; fetchTransaction tetap dijalankan
+    }
+  };
+
+  const handlePrintRow = (trx) => {
+    sessionStorage.setItem("last_transaction", JSON.stringify(trx));
+    navigate(
+      `/transaction/print?order_id=${encodeURIComponent(trx.order_number ?? trx.id)}`,
+      {
+        state: { transaction: trx },
+      },
+    );
+  };
+
+  const handleContinuePayment = async (trx) => {
+    try {
+      setBusyId(trx.id);
+      const res = await api.post(`/transaction/${trx.id}/continue`, {});
+      const payload = res?.data ?? res;
+      const snapToken = payload?.payment_gateway?.token;
+      const redirectUrl = payload?.payment_gateway?.redirect_url;
+
+      if (snapToken && window.snap?.pay) {
+        window.snap.pay(snapToken, {
+          onSuccess: async (result) => {
+            await syncOrderAfterSnap(trx, result);
+            await fetchTransaction();
+            Swal.fire({
+              icon: "success",
+              title: "Payment Success",
+              text: "Transaction has been paid.",
+              timer: 1400,
+              showConfirmButton: false,
+            });
+          },
+          onPending: async () => {
+            await fetchTransaction();
+          },
+          onError: () => {
+            Swal.fire({
+              icon: "error",
+              title: "Payment Failed",
+              text: "Unable to complete payment.",
+            });
+          },
+          onClose: async () => {
+            await fetchTransaction();
+          },
+        });
+        return;
+      }
+
+      if (redirectUrl) {
+        window.open(redirectUrl, "_blank", "noopener,noreferrer");
+        await fetchTransaction();
+        return;
+      }
+
+      await fetchTransaction();
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: payload?.message || "Transaction updated.",
+        timer: 1400,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text:
+          error?.response?.data?.message ||
+          error.message ||
+          "Failed to continue payment",
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const handleDelete = async (id) => {
-    const isConfirm = window.confirm("Are you sure want to delete this data?");
-    if (!isConfirm) {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Delete Transaction?",
+      text: "Are you sure you want to delete this transaction?",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#dc2626",
+    });
+
+    if (!result.isConfirmed) {
       return;
     }
+
     try {
-      await api.delete(`/user/${id}`);
-      fetchTransaction();
+      setBusyId(id);
+      await api.delete(`/transaction/${id}`);
+      await fetchTransaction();
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "Transaction has been deleted.",
+        timer: 1300,
+        showConfirmButton: false,
+      });
     } catch (error) {
-      const errMsg = error.message;
-      console.log(errMsg);
+      console.log(error.message);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text:
+          error?.response?.data?.message ||
+          error.message ||
+          "Failed to delete transaction.",
+      });
+    } finally {
+      setBusyId(null);
     }
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    fetchTransaction();
-  };
-
-  // const handleChange = (e) => {
-  //   setFormData({
-  //     ...formData,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const payload = {
-  //       name: formData.name,
-  //       email: formData.email,
-  //       is_active: parseInt(formData.is_active),
-  //     };
-  //     if (isEdit) {
-  //       await api.put(`/transaction/${formData.id}`, payload);
-  //     } else {
-  //       await api.post("/transaction", payload);
-  //     }
-  //     setFormData(_initForm);
-  //   } catch (error) {
-  //     const errMsg = error.message;
-  //     console.log(errMsg);
-  //   } finally {
-  //     fetchTransaction();
-  //     setShowModal(false);
-  //   }
-  // };
-
   return (
-    <>
-      <Card className="p-6 border-0 rounded-md shadow-md border-border">
-        <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
-          <div>
-            <CardTitle className="text-xl font-bold">Data User</CardTitle>
-          </div>
-          <Button
-            className="rounded-md"
-            onClick={() => navigate("/transaction/create")}
-          >
-            Create New transaction
-          </Button>
-        </CardHeader>
-        <CardContent className="p-0">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs uppercase border-y bg-muted/30 text-muted-foreground">
-              <tr>
-                <th className="px-5 py-3 font-md">#</th>
-                <th className="px-2 py-3 font-md">Order number</th>
-                <th className="py-3 font-md">Payment method</th>
-                <th className="px-2 py-3 font-md">Product</th>
-                <th className="px-8 py-3 font-md">Status</th>
-                <th className="px-6 py-3 font-md">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {transaction.map((user, index) => (
-                <tr key={index} className="transition-colors hover:bg-muted/50">
-                  <td className="px-5 py-6 whitespace-nowrap">{index + 1}</td>
-                  <td className="px-5">{user.order_number}</td>
-                  <td className="px-14">{user.payment_method}</td>
-                  <td className="px-1">
-                    {user.items.map((item) => (
-                      <ul>
-                        <li>{item.nama}</li>
-                      </ul>
-                    ))}
-                  </td>
-                  <td className="px-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
+    <Card className="p-6 border-0 rounded-md shadow-md border-border">
+      <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
+        <div>
+          <CardTitle className="text-xl font-bold">Data Transaction</CardTitle>
+        </div>
+        <Button
+          className="rounded-md"
+          onClick={() => navigate("/transaction/create")}
+        >
+          Create New transaction
+        </Button>
+      </CardHeader>
+      <CardContent className="p-0">
+        <table className="w-full text-sm text-left">
+          <thead className="text-xs uppercase border-y bg-muted/30 text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3 font-medium text-center">#</th>
+              <th className="px-4 py-3 font-medium text-left">Order number</th>
+              <th className="px-4 py-3 font-medium text-center">Payment method</th>
+              <th className="px-4 py-3 font-medium text-center">Product</th>
+              <th className="px-4 py-3 font-medium text-center">Status</th>
+              <th className="px-4 py-3 font-medium text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {transaction.map((trx, index) => {
+              const statusUpper = String(trx.status || "PENDING").toUpperCase();
+              const isPaid = ["PAID", "SUCCESS", "SETTLEMENT"].includes(
+                statusUpper,
+              );
+              const isPending = statusUpper === "PENDING";
+              const isRowBusy = busyId === trx.id;
 
-                      <span
-                        className={`text-xs font-medium ${
-                          user.is_active === 1
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-rose-600 dark:text-rose-400"
-                        }`}
+              return (
+                <tr
+                  key={trx.id ?? trx.order_number ?? index}
+                  className="transition-colors hover:bg-muted/50"
+                >
+                  <td className="px-4 py-4 text-center whitespace-nowrap">
+                    {index + 1}
+                  </td>
+                  <td className="px-4 py-4 font-mono text-xs text-left whitespace-nowrap">
+                    {trx.order_number}
+                  </td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">
+                    {trx.payment_method}
+                  </td>
+                  <td className="px-4 py-4 text-center">
+                    <ul className="space-y-0.5">
+                      {(trx.items || []).map((item, itemIdx) => (
+                        <li
+                          key={item.id ?? `${item.product_id ?? "item"}-${itemIdx}`}
+                          className="text-sm"
+                        >
+                          {item.nama ?? item.product?.nama ?? "-"}
+                          {item.qty ? ` (x${item.qty})` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  </td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        isPaid
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                          : isPending
+                            ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                            : "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400"
+                      }`}
+                    >
+                      {statusUpper}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">
+                    <div className="flex items-center justify-center gap-2">
+                      {isPending ? (
+                        <Button
+                          type="button"
+                          disabled={isRowBusy}
+                          onClick={() => handleContinuePayment(trx)}
+                          size="sm"
+                          className="text-white bg-amber-600 rounded-md hover:bg-amber-700"
+                        >
+                          {isRowBusy ? "Processing..." : "Payment"}
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          disabled={isRowBusy}
+                          onClick={() => handlePrintRow(trx)}
+                          size="sm"
+                          className="text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                        >
+                          Print
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        disabled={isRowBusy}
+                        onClick={() => handleDelete(trx.id)}
+                        size="sm"
+                        className="text-white bg-red-600 rounded-md hover:bg-red-700"
                       >
-                        {user.is_active === 1 ? "Active" : "Non-Active"}
-                      </span>
+                        Delete
+                      </Button>
                     </div>
                   </td>
-                  <td className="py-6 ">
-                    <Button
-                      onClick={() => handleDelete(user.id)}
-                      variant="danger"
-                      size="sm"
-                      className="text-white bg-indigo-600 rounded-md me-2 hover:bg-indigo-700"
-                    >
-                      Print
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(user.id)}
-                      variant="danger"
-                      size="sm"
-                      className="bg-red-500 rounded-md me-2 hover:bg-red-700"
-                    >
-                      Delete
-                    </Button>
-                  </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
-
-      {/* <AppModal
-        show={showModal}
-        onClose={handleCloseModal}
-        title={isEdit ? "Edit User" : "Create New User"}
-        onSubmit={handleSubmit}
-        submitLabel={isEdit ? "Save Change" : "Save"}
-      >
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Nama</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              placeholder="Enter your name"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Email</Label>
-            <Input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder="Enter your email"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>
-              Password {isEdit && "(Kosongkan jika tidak ingin mengubah)"}
-            </Label>
-            <div className="relative">
-            </div>
-          </div>
-
-          {isEdit && (
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <select
-                name="is_active"
-                value={formData.is_active}
-                onChange={handleChange}
-                className="flex w-full px-3 py-1 text-sm transition-colors bg-transparent border rounded-md shadow-sm h-9 border-input file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value={1}>Active</option>
-                <option value={0}>Non-Active</option>
-              </select>
-            </div>
-          )}
-        </div>
-      </AppModal> */}
-    </>
+              );
+            })}
+          </tbody>
+        </table>
+      </CardContent>
+    </Card>
   );
 };
 
