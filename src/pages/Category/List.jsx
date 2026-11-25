@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 import AppModal from "../../components/AppModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,15 +52,40 @@ const CategoryPage = () => {
   };
 
   const handleDelete = async (id) => {
-    const isConfirm = window.confirm("Are you sure want to delete this data?");
-    if (!isConfirm) {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Hapus Kategori?",
+      text: "Data kategori yang dihapus nggak bisa dibalikin.",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#dc2626",
+    });
+
+    if (!result.isConfirmed) {
       return;
     }
+
     try {
       await api.delete(`/category/${id}`);
+      await Swal.fire({
+        icon: "success",
+        title: "Terhapus",
+        text: "Data kategori berhasil dihapus.",
+        timer: 1000,
+        showConfirmButton: false,
+      });
       fetchCategories();
     } catch (error) {
       console.log(error.message);
+      await Swal.fire({
+        icon: "error",
+        title: "Gagal Hapus",
+        text:
+          error.response?.data?.message ||
+          error.message ||
+          "Terjadi kesalahan saat menghapus kategori.",
+      });
     }
   };
 
@@ -88,12 +114,29 @@ const CategoryPage = () => {
         await api.post("/category", payload);
       }
 
+      setShowModal(false);
       setFormData(_initForm);
-      fetchCategories();
+      await fetchCategories();
+
+      await Swal.fire({
+        icon: "success",
+        title: isEdit ? "Berhasil Diupdate" : "Berhasil Ditambahkan",
+        text: isEdit
+          ? "Data kategori berhasil diperbarui."
+          : "Kategori baru berhasil ditambahkan.",
+        timer: 1100,
+        showConfirmButton: false,
+      });
     } catch (error) {
       console.log(error.message);
-    } finally {
-      setShowModal(false);
+      await Swal.fire({
+        icon: "error",
+        title: isEdit ? "Gagal Update" : "Gagal Menyimpan",
+        text:
+          error.response?.data?.message ||
+          error.message ||
+          "Terjadi kesalahan saat menyimpan data kategori.",
+      });
     }
   };
 

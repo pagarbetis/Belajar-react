@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -119,26 +120,67 @@ const ProductPage = () => {
         await api.post("/product", payload);
       }
 
+      setShowModal(false);
       setFormData(_initForm);
-      fetchProducts();
+      await fetchProducts();
+
+      await Swal.fire({
+        icon: "success",
+        title: isEdit ? "Berhasil Diupdate" : "Berhasil Ditambahkan",
+        text: isEdit
+          ? "Data produk berhasil diperbarui."
+          : "Produk baru berhasil ditambahkan.",
+        timer: 1100,
+        showConfirmButton: false,
+      });
     } catch (error) {
       console.log(error.message);
-    } finally {
-      setShowModal(false);
+      await Swal.fire({
+        icon: "error",
+        title: isEdit ? "Gagal Update" : "Gagal Menyimpan",
+        text:
+          error.response?.data?.message ||
+          error.message ||
+          "Terjadi kesalahan saat menyimpan data produk.",
+      });
     }
   };
 
   const handleDelete = async (id) => {
-    const confirmation = window.confirm(
-      "Are you sure want to delete this product?",
-    );
-    if (confirmation) {
-      try {
-        await api.delete(`/product/${id}`);
-        fetchProducts();
-      } catch (error) {
-        console.log(error.message);
-      }
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Hapus Produk?",
+      text: "Data produk yang dihapus nggak bisa dibalikin.",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#dc2626",
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    try {
+      await api.delete(`/product/${id}`);
+      await Swal.fire({
+        icon: "success",
+        title: "Terhapus",
+        text: "Data produk berhasil dihapus.",
+        timer: 1000,
+        showConfirmButton: false,
+      });
+      fetchProducts();
+    } catch (error) {
+      console.log(error.message);
+      await Swal.fire({
+        icon: "error",
+        title: "Gagal Hapus",
+        text:
+          error.response?.data?.message ||
+          error.message ||
+          "Terjadi kesalahan saat menghapus produk.",
+      });
     }
   };
 
@@ -195,8 +237,8 @@ const ProductPage = () => {
                       <td className="px-4 py-4 text-center whitespace-nowrap">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${isAvailable
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
-                              : "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                            : "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400"
                             }`}
                         >
                           {isAvailable ? "Available" : "Out of Stock"}

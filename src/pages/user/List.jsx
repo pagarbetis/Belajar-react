@@ -162,12 +162,29 @@ const ListUser = () => {
         await api.post("/user", payload);
       }
 
+      setShowModal(false);
       setFormData(_initForm);
-      fetchUser();
+      await fetchUser();
+
+      await Swal.fire({
+        icon: "success",
+        title: isEdit ? "Berhasil Diupdate" : "Berhasil Ditambahkan",
+        text: isEdit
+          ? "Data user berhasil diperbarui."
+          : "User baru berhasil ditambahkan.",
+        timer: 1100,
+        showConfirmButton: false,
+      });
     } catch (error) {
       console.log(error.message);
-    } finally {
-      setShowModal(false);
+      await Swal.fire({
+        icon: "error",
+        title: isEdit ? "Gagal Update" : "Gagal Menyimpan",
+        text:
+          error.response?.data?.message ||
+          error.message ||
+          "Terjadi kesalahan saat menyimpan data user.",
+      });
     }
   };
 
@@ -231,8 +248,8 @@ const ListUser = () => {
                       <td className="px-4 py-4 text-center whitespace-nowrap">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${isActive
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
-                              : "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                            : "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400"
                             }`}
                         >
                           {isActive ? "Active" : "Non-Active"}
