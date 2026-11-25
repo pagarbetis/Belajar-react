@@ -37,7 +37,7 @@ const handleLogin = async (e) => {
     setIsLoading(true);
 
     try {
-      const res = await api.post("/api/auth/login", formData);
+      const res = await api.post("/auth/login", formData);
       const token = res?.token ?? res?.data?.token;
 
       if (!token) {
